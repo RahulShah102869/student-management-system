@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎓 Student Management System</h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="header-actions">
+            <a href="/add" class="btn btn-success">
+                ➕ Add New Student
+            </a>
+            <a href="/export/csv" class="btn btn-primary">
+                📥 Export CSV
+            </a>
+
+            <form method="GET" class="search-form">
+                <input type="text" name="search" placeholder="🔍 Search by ID, Name, or Course..."
+                    value="{{ search_query or '' }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+                {% if search_query %}
+                <a href="/" class="btn btn-warning">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div
+            style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: #f8f9ff; border-radius: 12px;">
+            <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap; flex: 1;">
+                <input type="hidden" name="search" value="{{ search_query or '' }}">
+
+                <select name="course"
+                    style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="">All Courses</option>
+                    {% for course in all_courses %}
+                    <option value="{{ course }}" {% if course_filter==course %}selected{% endif %}>{{ course }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="semester"
+                    style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="">All Semesters</option>
+                    {% for semester in all_semesters %}
+                    <option value="{{ semester }}" {% if semester_filter==semester %}selected{% endif %}>{{ semester }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <select name="sort_by"
+                    style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="id" {% if sort_by=='id' %}selected{% endif %}>Sort by ID</option>
+                    <option value="name" {% if sort_by=='name' %}selected{% endif %}>Sort by Name</option>
+                    <option value="course" {% if sort_by=='course' %}selected{% endif %}>Sort by Course</option>
+                    <option value="semester" {% if sort_by=='semester' %}selected{% endif %}>Sort by Semester</option>
+                </select>
+
+                <select name="sort_order"
+                    style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                    <option value="DESC" {% if sort_order=='DESC' %}selected{% endif %}>Descending</option>
+                    <option value="ASC" {% if sort_order=='ASC' %}selected{% endif %}>Ascending</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">Apply Filters</button>
+                <a href="/" class="btn btn-warning" style="padding: 10px 20px;">Clear All</a>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if students %}
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student[0] }}</td>
+                        <td>{{ student[1] }}</td>
+                        <td><strong>{{ student[2] }}</strong></td>
+                        <td>{{ student[3] or '-' }}</td>
+                        <td>{{ student[4] or '-' }}</td>
+                        <td>{{ student[5] or '-' }}</td>
+                        <td>{{ student[6] or '-' }}</td>
+                        <td>
+                            <a href="/edit/{{ student[0] }}" class="btn btn-warning btn-sm">✏️ Edit</a>
+                            <a href="/delete/{{ student[0] }}" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Are you sure you want to delete this student?')">🗑️ Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="no-data">
+                                <div>📚</div>
+                                <p>No students found. Click "Add New Student" to get started!</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 10px;">
+            <a href="/dashboard" class="btn btn-primary" style="padding: 8px 20px; font-size: 14px;">📊 Dashboard</a>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center; color: #999; font-size: 14px;">
+            Total Students: <strong>{{ students|length if students else 0 }}</strong>
+        </div>
+    </div>
+</body>
+
+</html>

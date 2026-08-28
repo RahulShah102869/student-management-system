@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Student</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>✏️ Edit Student</h1>
+            <a href="/" class="btn btn-primary">← Back to Home</a>
+        </div>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="form-container">
+            <form method="POST">
+                <input type="hidden" name="id" value="{{ student[0] }}">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="student_id">Student ID *</label>
+                        <input type="text" id="student_id" name="student_id" value="{{ student[1] }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" value="{{ student[2] }}" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ student[3] or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone" value="{{ student[4] or '' }}">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course">Course</label>
+                        <input type="text" id="course" name="course" value="{{ student[5] or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester" name="semester">
+                            <option value="">Select Semester</option>
+                            <option value="Fall 2024" {% if student[6] == 'Fall 2024' %}selected{% endif %}>Fall 2024</option>
+                            <option value="Spring 2025" {% if student[6] == 'Spring 2025' %}selected{% endif %}>Spring 2025</option>
+                            <option value="Summer 2025" {% if student[6] == 'Summer 2025' %}selected{% endif %}>Summer 2025</option>
+                            <option value="Fall 2025" {% if student[6] == 'Fall 2025' %}selected{% endif %}>Fall 2025</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address">{{ student[7] or '' }}</textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-warning btn-block">🔄 Update Student</button>
+                    <a href="/" class="btn btn-primary btn-block">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

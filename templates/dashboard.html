@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Student Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>📊 Dashboard</h1>
+            <div>
+                <a href="/" class="btn btn-primary">← Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 36px;">👨‍🎓</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ total_students }}</div>
+                <div style="font-size: 14px; opacity: 0.9;">Total Students</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 36px;">📚</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ total_courses }}</div>
+                <div style="font-size: 14px; opacity: 0.9;">Total Courses</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 36px;">📖</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ course_data|length }}</div>
+                <div style="font-size: 14px; opacity: 0.9;">Active Courses</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 36px;">📅</div>
+                <div style="font-size: 32px; font-weight: bold;">{{ semester_data|length }}</div>
+                <div style="font-size: 14px; opacity: 0.9;">Semesters</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div style="background: #f8f9ff; padding: 20px; border-radius: 12px;">
+                <h3 style="margin-bottom: 15px; color: #333;">Students by Course</h3>
+                <canvas id="courseChart" style="max-height: 300px;"></canvas>
+            </div>
+            <div style="background: #f8f9ff; padding: 20px; border-radius: 12px;">
+                <h3 style="margin-bottom: 15px; color: #333;">Students by Semester</h3>
+                <canvas id="semesterChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Students -->
+        <div style="background: #f8f9ff; padding: 20px; border-radius: 12px;">
+            <h3 style="margin-bottom: 15px; color: #333;">🆕 Recent Students</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_students %}
+                            {% for student in recent_students %}
+                            <tr>
+                                <td>{{ student[1] }}</td>
+                                <td><strong>{{ student[2] }}</strong></td>
+                                <td>{{ student[5] or '-' }}</td>
+                                <td>{{ student[6] or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #999; padding: 30px 0;">No students found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== COURSE DATA from Python ==========
+        var courseData = [];
+        var semesterData = [];
+        
+        console.log("Course Data:", courseData);
+        console.log("Semester Data:", semesterData);
+
+        // ==================== COURSE CHART ====================
+        if (courseData && courseData.length > 0) {
+            var courseLabels = [];
+            var courseValues = [];
+            
+            for (var i = 0; i < courseData.length; i++) {
+                courseLabels.push(courseData[i][0]);
+                courseValues.push(courseData[i][1]);
+            }
+            
+            var courseCtx = document.getElementById('courseChart');
+            if (courseCtx) {
+                new Chart(courseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: courseLabels,
+                        datasets: [{
+                            label: 'Students',
+                            data: courseValues,
+                            backgroundColor: ['#667eea', '#11998e', '#f093fb', '#4facfe', '#f5576c', '#ffa726', '#26c6da', '#ab47bc', '#66bb6a', '#ef5350'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+        } else {
+            document.getElementById('courseChart').parentElement.innerHTML = '<p style="text-align:center;color:#999;padding:40px 0;">No course data available</p>';
+        }
+
+        // ==================== SEMESTER CHART ====================
+        if (semesterData && semesterData.length > 0) {
+            var semesterLabels = [];
+            var semesterValues = [];
+            
+            for (var i = 0; i < semesterData.length; i++) {
+                semesterLabels.push(semesterData[i][0]);
+                semesterValues.push(semesterData[i][1]);
+            }
+            
+            var semesterCtx = document.getElementById('semesterChart');
+            if (semesterCtx) {
+                new Chart(semesterCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: semesterLabels,
+                        datasets: [{
+                            label: 'Students',
+                            data: semesterValues,
+                            backgroundColor: ['#667eea', '#11998e', '#f093fb', '#4facfe', '#f5576c', '#ffa726', '#26c6da', '#ab47bc'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        } else {
+            document.getElementById('semesterChart').parentElement.innerHTML = '<p style="text-align:center;color:#999;padding:40px 0;">No semester data available</p>';
+        }
+    </script>
+</body>
+</html>
